@@ -21,9 +21,14 @@ spec:
         app: ecsdemo-nodejs
     spec:
       containers:
-      - image: brentley/ecsdemo-nodejs:latest
+      - image: gekart/ecsdemo-nodejs:latest
         imagePullPolicy: Always
         name: ecsdemo-nodejs
         ports:
         - containerPort: 3000
           protocol: TCP
+        env:
+        - name: MY_HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
