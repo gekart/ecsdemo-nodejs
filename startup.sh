@@ -2,7 +2,7 @@
 
 set -x
 
-IP=$(ip route show |grep -o src.* |cut -f2 -d" ")
+IP=$MY_HOST_IP
 # kubernetes sets routes differently -- so we will discover our IP differently
 if [[ ${IP} == "" ]]; then
   IP=$(hostname -i)
@@ -14,7 +14,7 @@ case "${SUBNET}" in
     10)
         orchestrator=ecs
         ;;
-    192)
+    172)
         orchestrator=kubernetes
         ;;
     *)
@@ -44,22 +44,13 @@ if [[ "${orchestrator}" == 'ecs' ]]; then
 fi
 
 if [[ "${orchestrator}" == 'kubernetes' ]]; then
-    if ((0<=${NETWORK} && ${NETWORK}<32))
+    if ((0<=${NETWORK} && ${NETWORK}<64))
         then
             zone=a
-    elif ((32<=${NETWORK} && ${NETWORK}<64))
+    elif ((64<=${NETWORK} && ${NETWORK}<128))
         then
             zone=b
-    elif ((64<=${NETWORK} && ${NETWORK}<96))
-        then
-            zone=c
-    elif ((96<=${NETWORK} && ${NETWORK}<128))
-        then
-            zone=a
-    elif ((128<=${NETWORK} && ${NETWORK}<160))
-        then
-            zone=b
-    elif ((160<=${NETWORK}))
+    elif ((128<=${NETWORK}))
         then
             zone=c
     else
@@ -78,6 +69,7 @@ fi
 
 # Still no luck? Perhaps we're running fargate!
 if [[ -z ${zone} ]]; then
+  export AWS_DEFAULT_REGION=$REGION
   ip_addr=$(curl -m2 -s ${ECS_CONTAINER_METADATA_URI} | jq -r '.Networks[].IPv4Addresses[]')
   declare -a subnets=( $(aws ec2 describe-subnets | jq -r .Subnets[].CidrBlock| sed ':a;N;$!ba;s/\n/ /g') )
   for sub in "${subnets[@]}"; do

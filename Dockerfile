@@ -1,5 +1,5 @@
 # FROM node:alpine
-FROM alpine:3.6
+FROM alpine:latest
 
 # set the default NODE_ENV to production
 # for dev/test build with: docker build --build-arg NODE=development .
@@ -10,9 +10,9 @@ ENV NODE_ENV ${NODE}
 # copy package info early to install npms and delete npm command
 WORKDIR /usr/src/app
 COPY package*.json ./
-RUN apk -U add curl jq bash nodejs nodejs-npm python3 py3-pip && \
-  pip3 install awscli netaddr && \
-  npm install && apk del --purge nodejs-npm && \
+RUN apk -U add curl jq bash nodejs npm python3 py3-pip && \
+  pip3 install --break-system-packages awscli netaddr && \
+  npm install && apk del --purge npm && \
   rm -rvf /var/cache/* /root/.npm /tmp/*
 
 # copy the code

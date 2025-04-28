@@ -21,7 +21,7 @@ spec:
         app: ecsdemo-nodejs
     spec:
       containers:
-      - image: gekart/ecsdemo-nodejs:latest
+      - image: gekart/ecsdemo-nodejs:v3
         imagePullPolicy: Always
         name: ecsdemo-nodejs
         ports:
